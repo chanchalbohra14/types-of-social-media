@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Social Media Dice Quiz</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <style>
+      /* CSS Variables for consistent styling */
+      :root {
+        --bg-dark: #071029;
+        --bg-medium: #0f1724;
+        --accent-teal: #12b0a1;
+        --accent-magenta: #ff3d81;
+        --text-light: #e2e8f0;
+        --text-muted: #94a3b8;
+        --card-bg: rgba(15, 23, 36, 0.8);
+        --border-color: rgba(18, 176, 161, 0.3);
+        --shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: var(--font-stack);
+        background: linear-gradient(
+          135deg,
+          var(--bg-dark) 0%,
+          var(--bg-medium) 100%
+        );
+        color: var(--text-light);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Animated background particles */
+      .bg-particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .particle {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: var(--accent-teal);
+        border-radius: 50%;
+        opacity: 0.6;
+        animation: float 6s infinite ease-in-out;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-20px) rotate(180deg);
+        }
+      }
+
+      /* Header */
+      .header {
+        position: relative;
+        z-index: 10;
+        text-align: center;
+        padding: 2rem 1rem;
+      }
+
+      .header h1 {
+        font-size: clamp(1rem, 3vw, 2.5rem);
+        font-weight: 700;
+        background: linear-gradient(
+          135deg,
+          var(--accent-teal),
+          var(--accent-magenta)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+      }
+
+      .header p {
+        font-size: 1.2rem;
+        color: var(--text-muted);
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      /* Main dice section */
+      .dice-section {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem 1rem;
+        min-height: 70vh;
+      }
+
+      /* 3D Dice Container */
+      .dice-container {
+        perspective: 1000px;
+        margin-bottom: 3rem;
+      }
+
+      .dice {
+        width: 200px;
+        height: 200px;
+        position: relative;
+        transform-style: preserve-3d;
+        animation: idleRotate 8s infinite linear;
+        transition: transform 0.1s ease-out;
+      }
+
+      .dice.rolling {
+        animation: rollSpin 2s ease-out;
+      }
+
+      .dice.scaling {
+        transform: scale(1.1);
+      }
+
+      @keyframes idleRotate {
+        from {
+          transform: rotateX(15deg) rotateY(0deg);
+        }
+        to {
+          transform: rotateX(15deg) rotateY(360deg);
+        }
+      }
+
+      @keyframes rollSpin {
+        0% {
+          transform: rotateX(15deg) rotateY(0deg) scale(1);
+        }
+        20% {
+          transform: rotateX(45deg) rotateY(180deg) scale(1.1);
+        }
+        60% {
+          transform: rotateX(90deg) rotateY(720deg) scale(1.1);
+        }
+        100% {
+          transform: rotateX(15deg) rotateY(1080deg) scale(1);
+        }
+      }
+
+      .dice-face {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(135deg, #2a3142 0%, #1a1f2e 100%);
+        border: 3px solid var(--border-color);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        box-shadow: var(--shadow);
+        backface-visibility: hidden;
+      }
+
+      .dice-face i {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 8rem; /* Set a consistent icon size */
+      }
+
+      .dice-face.front {
+        transform: rotateY(0deg) translateZ(100px);
+      }
+      .dice-face.back {
+        transform: rotateY(180deg) translateZ(100px);
+      }
+      .dice-face.right {
+        transform: rotateY(90deg) translateZ(100px);
+      }
+      .dice-face.left {
+        transform: rotateY(-90deg) translateZ(100px);
+      }
+      .dice-face.top {
+        transform: rotateX(90deg) translateZ(100px);
+      }
+      .dice-face.bottom {
+        transform: rotateX(-90deg) translateZ(100px);
+      }
+
+      /* Platform icons */
+      .platform-icon {
+        width: 80px;
+        height: 80px;
+        filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+      }
+
+      /* Roll button */
+      .roll-btn {
+        background: linear-gradient(
+          135deg,
+          var(--accent-teal),
+          var(--accent-magenta)
+        );
+        color: white;
+        border: none;
+        padding: 1rem 2.5rem;
+        font-size: 1.4rem;
+        font-weight: 600;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .roll-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 35px rgba(18, 176, 161, 0.4);
+      }
+
+      .roll-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .roll-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        transition: left 0.6s;
+      }
+
+      .roll-btn:hover::before {
+        left: 100%;
+      }
+
+      /* Content section */
+      .content-section {
+        position: relative;
+        z-index: 10;
+        padding: 2rem 1rem;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transform: translateY(50px);
+        transition: all 0.6s ease;
+      }
+
+      .content-section.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .platform-card {
+        background: rgba(15, 23, 36, 0.85);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        width: 95vw; /* Increased width for full screen effect */
+        height: 95vh; /* Increased height for full screen effect */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .platform-display {
+        display: flex;
+        align-items: center;
+        gap: 3rem;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .content-dice {
+        width: 250px; /* Increased size for logo container */
+        height: 250px;
+        background: linear-gradient(135deg, #2a3142 0%, #1a1f2e 100%);
+        border: 2px solid var(--border-color);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow);
+        flex-shrink: 0;
+        position: relative;
+        animation: pulseGlow 3s infinite ease-in-out;
+      }
+
+      @keyframes pulseGlow {
+        0%,
+        100% {
+          box-shadow: var(--shadow), 0 0 0 0 rgba(18, 176, 161, 0.4);
+        }
+        50% {
+          box-shadow: var(--shadow), 0 0 0 8px rgba(18, 176, 161, 0.1);
+        }
+      }
+
+      .content-dice i {
+        font-size: 15rem; /* Increased logo size */
+      }
+
+      .arrow-connector {
+        width: 40px;
+        height: 40px;
+        color: var(--accent-teal);
+        flex-shrink: 0;
+        animation: arrowRight 1s infinite ease-in-out;
+      }
+
+      @keyframes arrowRight {
+        0%,
+        100% {
+          transform: translateX(0);
+          opacity: 0.8;
+        }
+        50% {
+          transform: translateX(10px);
+          opacity: 1;
+        }
+      }
+
+      @keyframes arrowDown {
+        0%,
+        100% {
+          transform: rotate(90deg) translateY(0);
+          opacity: 0.8;
+        }
+        50% {
+          transform: rotate(90deg) translateY(10px);
+          opacity: 1;
+        }
+      }
+
+      .platform-info {
+        flex: 1;
+        text-align: left;
+        max-width: 600px;
+      }
+
+      .platform-info h2 {
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--accent-teal);
+      }
+
+      .platform-info ul {
+        list-style: disc; /* Changed to standard bullets */
+        margin-left: 20px;
+      }
+
+      .platform-info li {
+        margin: 1rem 0;
+        font-size: 1.2rem;
+        line-height: 1.8;
+      }
+
+      /* Quiz section */
+      .quiz-section {
+        position: relative;
+        z-index: 10;
+        max-width: 800px;
+        margin: 4rem auto 2rem;
+        padding: 0 1rem;
+        opacity: 0;
+        transform: translateY(50px);
+        transition: all 0.6s ease;
+      }
+
+      .quiz-section.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .quiz-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        text-align: center;
+      }
+
+      .quiz-header {
+        margin-bottom: 2rem;
+      }
+
+      .quiz-header h2 {
+        font-size: 2.5rem;
+        background: linear-gradient(
+          135deg,
+          var(--accent-teal),
+          var(--accent-magenta)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+      }
+
+      .quiz-progress {
+        background: rgba(255, 255, 255, 0.1);
+        height: 8px;
+        border-radius: 4px;
+        margin: 1rem 0;
+        overflow: hidden;
+      }
+
+      .progress-bar {
+        background: linear-gradient(
+          90deg,
+          var(--accent-teal),
+          var(--accent-magenta)
+        );
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s ease;
+        border-radius: 4px;
+      }
+
+      .question {
+        margin: 2rem 0;
+      }
+
+      .question h3 {
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+      }
+
+      .options {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .option {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid transparent;
+        padding: 1rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: left;
+      }
+
+      .option:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: var(--accent-teal);
+      }
+
+      .option.selected {
+        border-color: var(--accent-teal);
+        background: rgba(18, 176, 161, 0.2);
+      }
+
+      .option.correct {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.2);
+      }
+
+      .option.incorrect {
+        border-color: #ef4444;
+        background: rgba(239, 68, 68, 0.2);
+      }
+
+      .quiz-btn {
+        background: linear-gradient(
+          135deg,
+          var(--accent-teal),
+          var(--accent-magenta)
+        );
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin: 1.5rem 0.5rem;
+      }
+
+      .quiz-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(18, 176, 161, 0.4);
+      }
+
+      .quiz-results {
+        text-align: center;
+        margin-top: 2rem;
+      }
+
+      .score {
+        font-size: 3rem;
+        font-weight: bold;
+        color: var(--accent-teal);
+        margin-bottom: 1rem;
+      }
+
+      /* Responsive design */
+      @media (max-width: 768px) {
+        .dice {
+          width: 150px;
+          height: 150px;
+        }
+
+        .dice-face {
+          width: 150px;
+          height: 150px;
+        }
+
+        .dice-face.front {
+          transform: rotateY(0deg) translateZ(75px);
+        }
+        .dice-face.back {
+          transform: rotateY(180deg) translateZ(75px);
+        }
+        .dice-face.right {
+          transform: rotateY(90deg) translateZ(75px);
+        }
+        .dice-face.left {
+          transform: rotateY(-90deg) translateZ(75px);
+        }
+        .dice-face.top {
+          transform: rotateX(90deg) translateZ(75px);
+        }
+        .dice-face.bottom {
+          transform: rotateX(-90deg) translateZ(75px);
+        }
+
+        .platform-icon {
+          width: 60px;
+          height: 60px;
+        }
+
+        .platform-display {
+          flex-direction: column;
+          text-align: center;
+          gap: 1.5rem;
+        }
+
+        .arrow-connector {
+          transform: rotate(90deg);
+        }
+
+        .content-dice {
+          width: 100px;
+          height: 100px;
+        }
+
+        .content-dice .platform-icon {
+          width: 50px;
+          height: 50px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Background particles -->
+    <div class="bg-particles" id="particles"></div>
+
+    <!-- Header -->
+    <div id="preQuizContent">
+      <header class="header">
+        <h1>Types of Social Media</h1>
+        <p>
+          Discover the power of each platform through interactive learning and
+          test your knowledge!
+        </p>
+      </header>
+
+      <!-- Main dice section -->
+      <section class="dice-section" id="diceSection">
+        <div class="dice-container">
+          <div class="dice" id="dice">
+            <!-- Dice faces with official brand colors -->
+            <div class="dice-face front">
+              <i class="fab fa-facebook-f" style="color: #1877f2"></i>
+            </div>
+            <div class="dice-face back">
+              <i class="fab fa-instagram" style="color: #e1306c"></i>
+            </div>
+            <div class="dice-face right">
+              <i class="fab fa-twitter" style="color: #1da1f2"></i>
+            </div>
+            <div class="dice-face left">
+              <i class="fab fa-linkedin-in" style="color: #0a66c2"></i>
+            </div>
+            <div class="dice-face top">
+              <i class="fab fa-youtube" style="color: #ff0000"></i>
+            </div>
+            <div class="dice-face bottom">
+              <i class="fab fa-whatsapp" style="color: #25d366"></i>
+            </div>
+          </div>
+        </div>
+
+        <button class="roll-btn" id="rollBtn">🎲 Roll the Dice!</button>
+      </section>
+
+      <!-- Content section -->
+      <section class="content-section" id="contentSection">
+        <div class="platform-card">
+          <div class="platform-display" id="platformDisplay">
+            <div class="content-dice" id="contentDice">
+              <!-- Platform icon will be inserted here -->
+            </div>
+            <div class="arrow-connector">
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                width="40"
+                height="40"
+              >
+                <path
+                  d="M2 12 L18 12 M11 5 L18 12 L11 19"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            <div class="platform-info" id="platformInfo">
+              <!-- Platform info will be inserted here -->
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <!-- Quiz section -->
+    <section class="quiz-section" id="quizSection">
+      <div class="quiz-card">
+        <div class="quiz-header">
+          <h2>🧠 Knowledge Quiz</h2>
+          <p>Test what you've learned about social media platforms!</p>
+          <div class="quiz-progress">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+          <p id="questionCounter">Question 1 of 15</p>
+        </div>
+
+        <div class="quiz-content" id="quizContent">
+          <!-- Quiz content will be inserted here -->
+        </div>
+      </div>
+    </section>
+
+    <script>
+      // Platform data with information
+      const platforms = [
+        {
+          name: "WhatsApp",
+          iconClass: "fa-whatsapp",
+          color: "#25D366",
+          bullets: [
+            "Instant messaging with high open rates",
+            "WhatsApp Business API for customer support",
+            "Broadcast lists and status updates",
+            "Excellent for direct customer communication and CRM",
+          ],
+        },
+        {
+          name: "Facebook",
+          iconClass: "fa-facebook-f",
+          color: "#1877F2",
+          bullets: [
+            "Business Pages and community Groups",
+            "Mature and sophisticated ad targeting system",
+            "Community building and event promotion",
+            "Cross-platform integration with Instagram ads",
+          ],
+        },
+        {
+          name: "Instagram",
+          iconClass: "fa-instagram",
+          color: "#E1306C",
+          bullets: [
+            "Visual storytelling through photos and videos",
+            "Reels for viral content discovery",
+            "Influencer marketing and brand partnerships",
+            "Shopping tags for direct e-commerce integration",
+          ],
+        },
+        {
+          name: "YouTube",
+          iconClass: "fa-youtube",
+          color: "#FF0000",
+          bullets: [
+            "Long-form video content and tutorials",
+            "Strong SEO benefits through Google search",
+            "Monetization through ads and memberships",
+            "Educational content and thought leadership",
+          ],
+        },
+        {
+          name: "Snapchat",
+          iconClass: "fa-snapchat-ghost",
+          color: "#FFFC00",
+          bullets: [
+            "AR lenses and creative filters",
+            "Stories for short-lived content",
+            "Strong engagement with young audiences",
+            "Brand partnerships for viral campaigns",
+          ],
+        },
+        {
+          name: "Twitter",
+          iconClass: "fa-twitter",
+          color: "#1DA1F2",
+          bullets: [
+            "Real-time updates and news sharing",
+            "Trending topics and hashtag campaigns",
+            "Brand voice development and customer service",
+            "Crisis communication and PR management",
+          ],
+        },
+        {
+          name: "LinkedIn",
+          iconClass: "fa-linkedin-in",
+          color: "#0A66C2",
+          bullets: [
+            "B2B networking and lead generation",
+            "Thought leadership content publishing",
+            "Professional recruiting and talent acquisition",
+            "Sponsored content and InMail advertising",
+          ],
+        },
+        {
+          name: "Pinterest",
+          iconClass: "fa-pinterest-p",
+          color: "#E60023",
+          bullets: [
+            "Visual discovery and inspiration",
+            "Pinboards for organizing content",
+            "Evergreen content lifespan",
+            "Shopping features for e-commerce",
+          ],
+        },
+        {
+          name: "Reddit",
+          iconClass: "fa-reddit-alien",
+          color: "#FF4500",
+          bullets: [
+            "Authentic community engagement",
+            "Niche communities and subreddits",
+            "Discussion-based marketing",
+            "User-generated content influence",
+          ],
+        },
+        {
+          name: "TikTok",
+          iconClass: "fa-tiktok",
+          color: "#000000",
+          bullets: [
+            "Short viral videos",
+            "Music and effects for content creation",
+            "Challenges and trends for engagement",
+            "Highly discoverable content for brands",
+          ],
+        },
+      ];
+
+      // Quiz questions
+      const quizQuestions = [
+        {
+          q: "Which platform is best for B2B networking and professional content?",
+          options: ["Instagram", "LinkedIn", "TikTok"],
+          correct: 1,
+        },
+        {
+          q: "What type of content performs best on TikTok?",
+          options: [
+            "Long tutorials",
+            "Short viral videos",
+            "Professional headshots",
+          ],
+          correct: 1,
+        },
+        {
+          q: "Which platform offers the strongest ad targeting capabilities?",
+          options: ["Facebook", "Pinterest", "Snapchat"],
+          correct: 0,
+        },
+        {
+          q: "What is WhatsApp's main marketing advantage?",
+          options: ["Viral content", "High open rates", "Video editing"],
+          correct: 1,
+        },
+        {
+          q: "Which platform is ideal for visual discovery and product inspiration?",
+          options: ["Twitter", "Reddit", "Pinterest"],
+          correct: 2,
+        },
+        {
+          q: "What makes YouTube valuable for SEO?",
+          options: [
+            "Integration with Google search",
+            "Short video format",
+            "Story features",
+          ],
+          correct: 0,
+        },
+        {
+          q: "Which platform is known for niche community discussions?",
+          options: ["Instagram", "Reddit", "Snapchat"],
+          correct: 1,
+        },
+        {
+          q: "What is Instagram's shopping feature called?",
+          options: ["Buy buttons", "Shopping tags", "Purchase pins"],
+          correct: 1,
+        },
+        {
+          q: "Which platform is best for real-time news and updates?",
+          options: ["LinkedIn", "Pinterest", "Twitter"],
+          correct: 2,
+        },
+        {
+          q: "What demographic does Snapchat primarily appeal to?",
+          options: [
+            "Older adults",
+            "Young demographics",
+            "Business professionals",
+          ],
+          correct: 1,
+        },
+        {
+          q: "Which platform offers AR lenses and creative filters?",
+          options: ["Snapchat", "LinkedIn", "YouTube"],
+          correct: 0,
+        },
+        {
+          q: "What type of content has the longest lifespan on Pinterest?",
+          options: ["Breaking news", "Evergreen content", "Live videos"],
+          correct: 1,
+        },
+        {
+          q: "Which platform is best for customer support via Business API?",
+          options: ["TikTok", "WhatsApp", "Reddit"],
+          correct: 1,
+        },
+        {
+          q: "What makes Reddit unique for marketing?",
+          options: [
+            "Professional networking",
+            "Authentic community engagement",
+            "Shopping features",
+          ],
+          correct: 1,
+        },
+        {
+          q: "Which platform offers monetization through ads and memberships?",
+          options: ["Pinterest", "YouTube", "Twitter"],
+          correct: 1,
+        },
+      ];
+
+      // App state
+      let remainingPlatforms = [...platforms];
+      let viewedPlatforms = [];
+      let isRolling = false;
+      let currentQuestion = 0;
+      let userAnswers = [];
+      let quizScore = 0;
+
+      // Create particles
+      function createParticles() {
+        const container = document.getElementById("particles");
+        for (let i = 0; i < 50; i++) {
+          const particle = document.createElement("div");
+          particle.className = "particle";
+          particle.style.left = Math.random() * 100 + "%";
+          particle.style.top = Math.random() * 100 + "%";
+          particle.style.animationDelay = Math.random() * 6 + "s";
+          particle.style.animationDuration = Math.random() * 3 + 3 + "s";
+          container.appendChild(particle);
+        }
+      }
+
+      // Dice rolling logic
+      function rollDice() {
+        if (isRolling) return;
+        if (remainingPlatforms.length === 0) return;
+
+        isRolling = true;
+        const rollBtn = document.getElementById("rollBtn");
+        const dice = document.getElementById("dice");
+
+        rollBtn.disabled = true;
+        rollBtn.textContent = "🎲 Rolling...";
+        dice.classList.add("rolling");
+        dice.classList.add("scaling");
+
+        setTimeout(() => {
+          // Pick a random platform from remaining
+          const randomIndex = Math.floor(
+            Math.random() * remainingPlatforms.length
+          );
+          const selectedPlatform = remainingPlatforms.splice(randomIndex, 1)[0];
+          viewedPlatforms.push(selectedPlatform);
+
+          // Dice faces
+          const diceFaces = ["front", "back", "right", "left", "top", "bottom"];
+          const faces = diceFaces.map((f) =>
+            dice.querySelector(`.dice-face.${f}`)
+          );
+
+          // Front face = selected platform
+          faces[0].innerHTML = `<i class="fab ${selectedPlatform.iconClass}" style="color: ${selectedPlatform.color};"></i>`;
+
+          // Fill other faces with remaining/unviewed platforms
+          let otherPlatforms = [
+            ...remainingPlatforms,
+            ...viewedPlatforms.filter((p) => p !== selectedPlatform),
+          ];
+          otherPlatforms = otherPlatforms.slice(0, 5); // max 5 faces
+
+          for (let i = 1; i < faces.length; i++) {
+            const plat = otherPlatforms[i - 1] || {
+              iconClass: "fa-question",
+              color: "#ccc",
+            };
+            faces[
+              i
+            ].innerHTML = `<i class="fab ${plat.iconClass}" style="color: ${plat.color};"></i>`;
+          }
+
+          // Show content
+          showPlatformContent(selectedPlatform);
+
+          dice.classList.remove("rolling");
+          dice.classList.remove("scaling");
+          isRolling = false;
+
+          if (remainingPlatforms.length === 0) {
+            rollBtn.textContent = "🎉 All Platforms Explored!";
+            rollBtn.disabled = true;
+            setTimeout(showQuiz, 2000);
+          } else {
+            rollBtn.textContent = "🎲 Roll Again!";
+            rollBtn.disabled = false;
+          }
+        }, 2000);
+      }
+
+      // Show platform content
+      function showPlatformContent(platform) {
+        const platformDisplay = document.getElementById("platformDisplay");
+        const contentDice = document.getElementById("contentDice");
+        const platformInfo = document.getElementById("platformInfo");
+
+        // Left: Big logo
+        contentDice.innerHTML = `<i class="fab ${platform.iconClass}" style="color: ${platform.color};"></i>`;
+
+        // Right: Bullet points
+        platformInfo.innerHTML = `
+          <h2>${platform.name}</h2>
+          <ul>
+              ${platform.bullets.map((b) => `<li>${b}</li>`).join("")}
+          </ul>
+      `;
+
+        // Make content section visible
+        document.getElementById("contentSection").classList.add("visible");
+
+        // Scroll smoothly
+        setTimeout(() => {
+          document
+            .getElementById("contentSection")
+            .scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100);
+      }
+
+      // Show quiz section
+      function showQuiz() {
+        const quizSection = document.getElementById("quizSection");
+        quizSection.classList.add("visible");
+        renderQuestion();
+        setTimeout(() => {
+          quizSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100);
+      }
+
+      // Quiz functionality
+      function renderQuestion() {
+        const question = quizQuestions[currentQuestion];
+        const quizContent = document.getElementById("quizContent");
+
+        quizContent.innerHTML = `
+                <div class="question">
+                    <h3>${question.q}</h3>
+                    <div class="options">
+                        ${question.options
+                          .map(
+                            (option, index) => `
+                            <div class="option" onclick="selectAnswer(${index})" data-index="${index}">
+                                ${option}
+                            </div>
+                        `
+                          )
+                          .join("")}
+                    </div>
+                </div>
+                `;
+
+        // Update progress
+        const progress = (currentQuestion / quizQuestions.length) * 100;
+        document.getElementById("progressBar").style.width = progress + "%";
+        document.getElementById("questionCounter").textContent = `Question ${
+          currentQuestion + 1
+        } of ${quizQuestions.length}`;
+      }
+
+      function selectAnswer(selectedIndex) {
+        const question = quizQuestions[currentQuestion];
+        const options = document.querySelectorAll(".option");
+
+        // Disable further selection
+        options.forEach((option) => {
+          option.style.pointerEvents = "none";
+          const index = parseInt(option.dataset.index);
+
+          if (index === question.correct) {
+            option.classList.add("correct");
+          } else if (index === selectedIndex) {
+            option.classList.add("incorrect");
+          }
+        });
+
+        // Store answer
+        userAnswers.push({
+          question: question.q,
+          selected: selectedIndex,
+          correct: question.correct,
+          isCorrect: selectedIndex === question.correct,
+        });
+
+        if (selectedIndex === question.correct) {
+          quizScore++;
+        }
+
+        // Show next button
+        const quizContent = document.getElementById("quizContent");
+        quizContent.innerHTML += `
+                <button class="quiz-btn" onclick="nextQuestion()">
+                    ${
+                      currentQuestion === quizQuestions.length - 1
+                        ? "Show Results"
+                        : "Next Question →"
+                    }
+                </button>
+            `;
+      }
+
+      function nextQuestion() {
+        currentQuestion++;
+
+        if (currentQuestion >= quizQuestions.length) {
+          showResults();
+        } else {
+          renderQuestion();
+        }
+      }
+
+      function showResults() {
+        const percentage = Math.round((quizScore / quizQuestions.length) * 100);
+        const quizContent = document.getElementById("quizContent");
+
+        quizContent.innerHTML = `
+                <div class="quiz-results">
+                    <div class="score">${quizScore}/${
+          quizQuestions.length
+        }</div>
+                    <h3>Your Score: ${percentage}%</h3>
+                    <p>${getScoreMessage(percentage)}</p>
+                    
+                    <div style="margin: 2rem 0; text-align: left;">
+                        <h4>Review Your Answers:</h4>
+                        ${userAnswers
+                          .map(
+                            (answer, index) => `
+                            <div style="margin: 1rem 0; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                                <strong>Q${index + 1}:</strong> ${
+                              answer.question
+                            }<br>
+                                <span style="color: ${
+                                  answer.isCorrect ? "#10b981" : "#ef4444"
+                                }">
+                                    ${
+                                      answer.isCorrect
+                                        ? "✓ Correct"
+                                        : "✗ Incorrect"
+                                    }
+                                </span>
+                                ${
+                                  !answer.isCorrect
+                                    ? `<br><small>Correct answer: ${
+                                        quizQuestions[index].options[
+                                          answer.correct
+                                        ]
+                                      }</small>`
+                                    : ""
+                                }
+                            </div>
+                        `
+                          )
+                          .join("")}
+                    </div>
+                    
+                    <button class="quiz-btn" onclick="retryQuiz()">🔄 Retry Quiz</button>
+                    <button class="quiz-btn" onclick="resetApp()">🎲 Roll Dice Again</button>
+                </div>
+            `;
+
+        // Update progress to 100%
+        document.getElementById("progressBar").style.width = "100%";
+        document.getElementById("questionCounter").textContent =
+          "Quiz Complete!";
+      }
+
+      function getScoreMessage(percentage) {
+        if (percentage >= 90)
+          return "Outstanding! You're a social media expert! 🏆";
+        if (percentage >= 80)
+          return "Excellent work! You know your platforms well! 🎉";
+        if (percentage >= 70) return "Good job! You have solid knowledge! 👏";
+        if (percentage >= 60)
+          return "Not bad! Keep learning about social media! 📚";
+        return "Time to study up on social media marketing! 💪";
+      }
+
+      function retryQuiz() {
+        currentQuestion = 0;
+        userAnswers = [];
+        quizScore = 0;
+        renderQuestion();
+      }
+
+      function resetApp() {
+        // Reset app state
+        remainingPlatforms = [...platforms];
+        viewedPlatforms = [];
+        currentQuestion = 0;
+        userAnswers = [];
+        quizScore = 0;
+        isRolling = false;
+
+        // Reset UI
+        const contentSection = document.getElementById("contentSection");
+        const quizSection = document.getElementById("quizSection");
+        const rollBtn = document.getElementById("rollBtn");
+        const dice = document.getElementById("dice");
+
+        contentSection.classList.remove("visible");
+        quizSection.classList.remove("visible");
+        rollBtn.disabled = false;
+        rollBtn.textContent = "🎲 Roll the Dice!";
+
+        // Reset dice face
+        const frontFace = dice.querySelector(".dice-face.front");
+        frontFace.innerHTML = `<i class="fab fa-facebook-f" style="color: #1877f2"></i>`;
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      // Event listeners and initialization
+      window.addEventListener("load", function () {
+        // Create particles
+        createParticles();
+
+        // Attach event listeners
+        const rollBtn = document.getElementById("rollBtn");
+        rollBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          rollDice();
+        });
+
+        // Keyboard support
+        document.addEventListener("keydown", function (e) {
+          if (
+            (e.code === "Space" || e.code === "Enter") &&
+            !isRolling &&
+            !rollBtn.disabled
+          ) {
+            e.preventDefault();
+            rollDice();
+          }
+        });
+
+        console.log("Social Media Dice Quiz loaded successfully!");
+      });
+    </script>
+  </body>
+</html>
