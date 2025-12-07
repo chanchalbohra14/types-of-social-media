@@ -55,10 +55,4 @@ Right-click on index.html.
 
 Select "Open with Live Server" (if installed).
 
-📄 License
-This project is licensed under the MIT License - see the LICENSE file (if applicable) for details.
-
-🙏 Acknowledgements
-Inspired by the need for clear, engaging educational resources in the field of digital literacy.
-
 Built with the assistance of an LLM as a high-speed development partner.
